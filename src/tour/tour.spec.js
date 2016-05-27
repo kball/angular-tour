@@ -465,4 +465,123 @@ describe('Directive: tour', function () {
       });
     });
   });
+  describe('separated tour with virtual-steps', function() {
+
+    var scope, elm, container, target, tour, tip1, tip2, tourScope;
+
+    beforeEach(function() {
+      scope = $rootScope.$new();
+      scope.stepIndex = 0;
+      scope.otherStepIndex = -1;
+
+      target = angular.element('<div id="tour-target"><span id="tip1">feature 1</span><span id="tip2">Feature 2</span></div>');
+      // set up first tour
+      tour = angular.element('<tour step="stepIndex" post-tour="tourEnd()" tour-complete="tourComplete()" post-step="tourStep()"></tour>');
+      tip1 = angular.element('<virtual-step tourtip-element="#tip1" tourtip="feature 1!">');
+      tip2 = angular.element('<virtual-step tourtip-element="#tip2" tourtip="feature 2!">');
+
+      tour.append(tip1);
+      tour.append(tip2);
+
+      angular.element('body').append(target)
+      elm = $compile(tour)(scope);
+      scope.$apply();
+      $timeout.flush();
+      tourScope = tour.scope();
+    });
+    afterEach(function() {
+      scope.$destroy();
+      angular.element('#tour-target').remove();
+
+    });
+
+    it('should call post-tour method', function() {
+      scope.tourEnd = function() {};
+      spyOn(scope, 'tourEnd');
+      var tour1Next = getTourStep().find('.tour-next-tip').eq(0);
+      tour1Next.click();
+      tour1Next.click();
+      expect(scope.tourEnd).toHaveBeenCalled();
+    });
+
+    it('should call post-tour method even when tour was canceled', function() {
+      scope.tourEnd = function() {};
+      spyOn(scope, 'tourEnd');
+      tourScope.closeTour();
+      expect(scope.tourEnd).toHaveBeenCalled();
+    });
+
+    it('should call tour-complete method', function() {
+      scope.tourComplete = function() {};
+      spyOn(scope, 'tourComplete');
+      var tour1Next = getTourStep().find('.tour-next-tip').eq(0);
+      tour1Next.click();
+      tour1Next.click();
+      expect(scope.tourComplete).toHaveBeenCalled();
+    });
+
+    it('should not call tour-complete method when tour canceled', function() {
+      scope.tourComplete = function() {};
+      spyOn(scope, 'tourComplete');
+      tourScope.closeTour();
+      expect(scope.tourComplete).not.toHaveBeenCalled();
+    });
+
+    it('should call post-step method', function() {
+      scope.tourStep = function() {};
+      spyOn(scope, 'tourStep');
+      var tour1Next = getTourStep().find('.tour-next-tip').eq(0);
+      tour1Next.click();
+      expect(scope.tourStep).toHaveBeenCalled();
+    });
+
+    it('should be able to handle multiple tours', function() {
+      // when first tour finishes, initializes second tour
+      scope.tourComplete = function() {
+        scope.otherStepIndex = 0;
+      };
+
+      // set up second tour
+      var otherTour = angular.element('<tour step="otherStepIndex"></tour>');
+      var otherTip1 = angular.element('<span tourtip="feature 1 of other tour!">' +
+        'Important website feature' + '</span>');
+      var otherTip2 = angular.element('<span tourtip="feature 2 of other tour!">' +
+        'Another website feature' + '</span>');
+
+      otherTour.append(otherTip1);
+      otherTour.append(otherTip2);
+
+      var otherElm = $compile(otherTour)(scope);
+
+      scope.$apply();
+      $timeout.flush();
+
+      var tour1Next = getTourStep().find('.tour-next-tip').eq(0);
+
+      // expect second tour to be closed
+      expect(otherTip1.scope().ttOpen).toBe(false);
+      expect(otherTip2.scope().ttOpen).toBe(false);
+
+      // finish first tour, expect tours to open and close correctly
+      expect(tip1.scope().ttOpen).toBe(true);
+      expect(tip2.scope().ttOpen).toBe(false);
+      tour1Next.click();
+      expect(tip1.scope().ttOpen).toBe(false);
+      expect(tip2.scope().ttOpen).toBe(true);
+      tour1Next.click();
+
+      // recompile the other tour element after the first tour finishes
+      otherElm = $compile(otherTour)(scope);
+      scope.$apply();
+      $timeout.flush();
+      var tour2Next = getTourStep().find('.tour-next-tip').eq(0);
+
+      // expect second tour to open after first tour finished
+      expect(otherTip1.scope().ttOpen).toBe(true);
+      expect(otherTip2.scope().ttOpen).toBe(false);
+      tour2Next.click();
+      expect(otherTip1.scope().ttOpen).toBe(false);
+      expect(otherTip2.scope().ttOpen).toBe(true);
+    });
+  });
 });

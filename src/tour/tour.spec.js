@@ -581,6 +581,8 @@ describe('Directive: tour', function () {
       expect(tip1.scope().ttOpen).toBe(false);
       expect(tip2.scope().ttOpen).toBe(true);
       tour1Next.click();
+      expect(tip2.scope().ttOpen).toBe(false);
+      expect(tip3.scope().ttOpen).toBe(true);
       tour1Next.click();
 
       // recompile the other tour element after the first tour finishes

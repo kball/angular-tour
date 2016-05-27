@@ -182,7 +182,7 @@ angular.module('angular-tour.tour', [])
             attrs.$observe('tourtip', function(val) {
                 scope.ttContent = val;
             });
-
+            var localTemplate = template;
             //defaults: tourConfig.placement
             attrs.$observe('tourtipPlacement', function(val) {
                 scope.ttPlacement = (val || tourConfig.placement).toLowerCase().trim();
@@ -236,7 +236,7 @@ angular.module('angular-tour.tour', [])
 
             if(attrs.hasOwnProperty('tourtipInlineTemplate')) {
               scope.ttIsInlineTemplate = true;
-              template = '<div class="tour-tip">' + element.html() + '</div>';
+              localTemplate = '<div class="tour-tip">' + element.html() + '</div>';
             };
 
             //Init assignments (fix for Angular 1.3+)
@@ -252,7 +252,7 @@ angular.module('angular-tour.tour', [])
             scope.ttAnimation = tourConfig.animation;
             scope.index = parseInt(attrs.tourtipStep, 10);
 
-            var tourtip = $compile(template)(scope);
+            var tourtip = $compile(localTemplate)(scope);
             tourCtrl.addStep(scope);
 
             // wrap this in a time out because the tourtip won't compile right away

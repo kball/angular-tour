@@ -234,6 +234,11 @@ angular.module('angular-tour.tour', [])
                 scope.ttSourceScope = !val ? tourConfig.useSourceScope : val === 'true';
             });
 
+            if(attrs.hasOwnProperty('tourtipInlineTemplate')) {
+              scope.ttIsInlineTemplate = true;
+              template = '<div class="tour-tip">' + element.html() + '</div>';
+            };
+
             //Init assignments (fix for Angular 1.3+)
             scope.ttNextLabel = tourConfig.nextLabel;
             scope.ttContainerElement = tourConfig.containerElement;
@@ -358,7 +363,7 @@ angular.module('angular-tour.tour', [])
             }
 
             function show() {
-                if (!scope.ttContent) {
+                if (!scope.ttContent && !scope.ttIsInlineTemplate) {
                     return;
                 }
 

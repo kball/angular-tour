@@ -479,7 +479,7 @@ describe('Directive: tour', function () {
       tour = angular.element('<tour step="stepIndex" post-tour="tourEnd()" tour-complete="tourComplete()" post-step="tourStep()"></tour>');
       tip1 = angular.element('<virtual-step tourtip-element="#tip1" tourtip="feature 1!">');
       tip2 = angular.element('<virtual-step tourtip-element="#tip2" tourtip="feature 2!">');
-      tip3 = angular.element('<virtual-step tourtip-element="#tip3" tourtip-inline-template><div class="inline-div"></div></virtual-step>');
+      tip3 = angular.element('<virtual-step tourtip-element="#tip3" tourtip tourtip-inline-template><div class="inline-div"></div></virtual-step>');
 
       tour.append(tip1);
       tour.append(tip2);

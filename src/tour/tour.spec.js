@@ -467,21 +467,23 @@ describe('Directive: tour', function () {
   });
   describe('separated tour with virtual-steps', function() {
 
-    var scope, elm, container, target, tour, tip1, tip2, tourScope;
+    var scope, elm, container, target, tour, tip1, tip2, tip3, tourScope;
 
     beforeEach(function() {
       scope = $rootScope.$new();
       scope.stepIndex = 0;
       scope.otherStepIndex = -1;
 
-      target = angular.element('<div id="tour-target"><span id="tip1">feature 1</span><span id="tip2">Feature 2</span></div>');
+      target = angular.element('<div id="tour-target"><span id="tip1">feature 1</span><span id="tip2">Feature 2</span><span id="tip3">Feature 3</span></div>');
       // set up first tour
       tour = angular.element('<tour step="stepIndex" post-tour="tourEnd()" tour-complete="tourComplete()" post-step="tourStep()"></tour>');
       tip1 = angular.element('<virtual-step tourtip-element="#tip1" tourtip="feature 1!">');
       tip2 = angular.element('<virtual-step tourtip-element="#tip2" tourtip="feature 2!">');
+      tip3 = angular.element('<virtual-step tourtip-element="#tip3" tourtip-inline-template><div class="inline-div"></div></virtual-step>');
 
       tour.append(tip1);
       tour.append(tip2);
+      tour.append(tip3);
 
       angular.element('body').append(target)
       elm = $compile(tour)(scope);
@@ -501,6 +503,7 @@ describe('Directive: tour', function () {
       var tour1Next = getTourStep().find('.tour-next-tip').eq(0);
       tour1Next.click();
       tour1Next.click();
+      tour1Next.click();
       expect(scope.tourEnd).toHaveBeenCalled();
     });
 
@@ -515,6 +518,7 @@ describe('Directive: tour', function () {
       scope.tourComplete = function() {};
       spyOn(scope, 'tourComplete');
       var tour1Next = getTourStep().find('.tour-next-tip').eq(0);
+      tour1Next.click();
       tour1Next.click();
       tour1Next.click();
       expect(scope.tourComplete).toHaveBeenCalled();
@@ -533,6 +537,14 @@ describe('Directive: tour', function () {
       var tour1Next = getTourStep().find('.tour-next-tip').eq(0);
       tour1Next.click();
       expect(scope.tourStep).toHaveBeenCalled();
+    });
+
+    it('should use the inline template when tourtip-inline-template is specified', function() {
+      var tour1Next = getTourStep().find('.tour-next-tip').eq(0);
+      tour1Next.click();
+      tour1Next.click();
+      var found = getTourStep().find('.inline-div').length > 0;
+      expect(found).toBe(true);
     });
 
     it('should be able to handle multiple tours', function() {
@@ -568,6 +580,7 @@ describe('Directive: tour', function () {
       tour1Next.click();
       expect(tip1.scope().ttOpen).toBe(false);
       expect(tip2.scope().ttOpen).toBe(true);
+      tour1Next.click();
       tour1Next.click();
 
       // recompile the other tour element after the first tour finishes
